@@ -56,6 +56,12 @@
         document.getElementById("result").textContent = "検索に失敗しました。アクセストークンを確認してください。";
       });
     });
+    
+    document.getElementById("searchInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      document.getElementById("searchBtn").click();
+    }
+    });
   </script>
 </body>
 </html>
