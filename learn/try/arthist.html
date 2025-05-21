@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify アーティスト検索</title>
+</head>
+<body>
+  <h1>Spotify アーティスト検索</h1>
+
+  <input type="text" id="searchInput" placeholder="アーティスト名を入力">
+  <button id="searchBtn">検索</button>
+
+  <div id="result"></div>
+
+  <script>
+    const accessToken = "BQA0xjh2G-63hvaIboZD07bZYnpTmIxHB-r4UdqCLfH_rCHYfqROTe_Le5nnawGD-fB0Xnj4uOn-pOJdkZtmlBDJUXFDf8CYTnOvkXxlxGmQ8dV4GZoN4LgEJ43M8R7CA0ip3FBZBdU";  // ← 有効なアクセストークンをここに貼り付ける
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      const query = document.getElementById("searchInput").value.trim();
+      if (!query) return;
+
+      document.getElementById("result").textContent = "検索中...";
+
+      fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist`, {
+        headers: {
+          Authorization: "Bearer " + accessToken
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("APIエラー：" + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "";
+
+        if (data.artists.items.length === 0) {
+          resultDiv.textContent = "アーティストが見つかりませんでした。";
+          return;
+        }
+
+        data.artists.items.forEach(artist => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <h2>${artist.name}</h2>
+            ${artist.images[0] ? `<img src="${artist.images[0].url}" width="200">` : ""}
+            <p>フォロワー数: ${artist.followers.total.toLocaleString()}</p>
+            <p><a href="${artist.external_urls.spotify}" target="_blank">Spotifyで見る</a></p>
+            <hr>
+          `;
+          resultDiv.appendChild(div);
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("result").textContent = "検索に失敗しました。アクセストークンを確認してください。";
+      });
+    });
+  </script>
+</body>
+</html>

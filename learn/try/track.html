@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify 曲名検索</title>
+</head>
+<body>
+  <h1>Spotify 曲検索</h1>
+
+  <input type="text" id="searchInput" placeholder="曲名を入力">
+  <button id="searchBtn">検索</button>
+
+  <div id="result"></div>
+
+  <script>
+    const accessToken = "BQA0xjh2G-63hvaIboZD07bZYnpTmIxHB-r4UdqCLfH_rCHYfqROTe_Le5nnawGD-fB0Xnj4uOn-pOJdkZtmlBDJUXFDf8CYTnOvkXxlxGmQ8dV4GZoN4LgEJ43M8R7CA0ip3FBZBdU";  // ← 有効なアクセストークンをここに
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      const query = document.getElementById("searchInput").value.trim();
+      if (!query) return;
+
+      document.getElementById("result").textContent = "検索中...";
+
+      fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track`, {
+        headers: {
+          Authorization: "Bearer " + accessToken
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("APIエラー：" + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "";
+
+        if (data.tracks.items.length === 0) {
+          resultDiv.textContent = "曲が見つかりませんでした。";
+          return;
+        }
+
+        data.tracks.items.forEach(track => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <h3>${track.name}</h3>
+            <p>アーティスト: ${track.artists.map(a => a.name).join(", ")}</p>
+            ${track.album.images[0] ? `<img src="${track.album.images[0].url}" width="200">` : ""}
+            <p><a href="${track.external_urls.spotify}" target="_blank">Spotifyで聴く</a></p>
+            <audio controls src="${track.preview_url}"></audio>
+            <hr>
+          `;
+          resultDiv.appendChild(div);
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("result").textContent = "検索に失敗しました。アクセストークンを確認してください。";
+      });
+    });
+  </script>
+</body>
+</html>
