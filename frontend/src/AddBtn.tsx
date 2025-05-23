@@ -4,7 +4,6 @@ function SearchResult({ keyword, token }: { keyword: string, token: string }) {
     const [tracks, setTracks] = useState<any[]>([]);
     const [fetched, setFetched] = useState(false);
 
-    // 検索キーワードが変更されたらAPIを呼び出す
     useEffect(() => {
         if (!keyword) {
             setTracks([]);
@@ -38,9 +37,25 @@ function SearchResult({ keyword, token }: { keyword: string, token: string }) {
             <h2>検索結果</h2>
             <ul id="searchResult">
                 {tracks.length > 0 ? (
-                    tracks.map((track) => (
-                        <li key={track.id}>
-                            {track.name} / {track.artists.map((artist: any) => artist.name).join(', ')}
+                    tracks.slice(0, 8).map((track) => (
+                        <li
+                            key={track.id}
+                            style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+                            onClick={() => {
+                                const artistNames = track.artists.map((artist: any) => artist.name).join(', ');
+                                console.log(`${track.name} / ${artistNames}`);
+                            }}
+                        >
+                            {track.album && track.album.images && track.album.images[0] && (
+                                <img
+                                    src={track.album.images[0].url}
+                                    alt={track.album.name}
+                                    style={{ width: 48, height: 48, objectFit: 'cover', marginRight: 8, borderRadius: 4 }}
+                                />
+                            )}
+                            <span>
+                                {track.name} / {track.artists.map((artist: any) => artist.name).join(', ')}
+                            </span>
                         </li>
                     ))
                 ) : (
